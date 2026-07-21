@@ -1,7 +1,6 @@
 pipeline {
     agent any
 
-    // Definición de variables reutilizables para el pipeline
     environment {
         IMAGE_NAME = 'hola-mundo-node'
         IMAGE_TAG  = "${env.BUILD_NUMBER}"
@@ -10,16 +9,15 @@ pipeline {
     }
 
     tools {
-        nodejs "Node25" // Configura una instalación de Node.js en Jenkins
-        dockerTool 'Dockertool'  // Configuración de la herramienta de Docker en Jenkins
+        nodejs "Node25" 
+        dockerTool 'Dockertool'  
     }
 
     stages {
-        // --- ETAPA AÑADIDA PARA CUMPLIR CON EL CRITERIO DE LA RÚBRICA ---
         stage('Test (Pruebas)') {
             steps {
                 echo "Ejecutando pruebas de sintaxis en el servidor Node.js..."
-                // Verifica que el archivo index.js no tenga errores de sintaxis antes de empaquetar
+                // Verifica que el archivo server.js no tenga errores de sintaxis antes de empaquetar
                 sh 'node --check server.js'
             }
         }
