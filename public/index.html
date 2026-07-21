@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NovaStore - Práctica de Integración PayPhone</title>
+
+  <!-- Estilos del Proyecto -->
+  <link rel="stylesheet" href="css/style.css">
+
+  <!-- Recursos de la Cajita de Pagos de PayPhone (CDN Oficial) -->
+  <link rel="stylesheet" href="https://cdn.payphonetodoesposible.com/box/v1.1/payphone-payment-box.css">
+  <script src="https://cdn.payphonetodoesposible.com/box/v1.1/payphone-payment-box.js"></script>
+</head>
+
+<body>
+
+  <div class="app-container">
+    <!-- Header -->
+    <header>
+      <div class="logo-container">
+        <div class="logo-icon">PP</div>
+        <div>
+          <h1>Pasarela_de_pago_D</h1>
+        </div>
+      </div>
+      <div>
+
+      </div>
+    </header>
+
+    <!-- Alerta de Configuración -->
+    <div id="config-alert" class="alert alert-warning" style="display: none;">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+        <line x1="12" y1="9" x2="12" y2="13"></line>
+        <line x1="12" y1="17" x2="12.01" y2="17"></line>
+      </svg>
+      <div>
+        <strong>Atención:</strong> La pasarela no está configurada. Complete el panel de credenciales para habilitar los
+        pagos.
+      </div>
+    </div>
+
+    <!-- Contenido Principal -->
+    <div class="main-grid">
+
+      <!-- Lado Izquierdo: Catálogo de Productos -->
+      <main>
+        <section class="glass-panel" style="margin-bottom: 2rem;">
+          <h2 class="panel-title">Catálogo de Productos de Prueba</h2>
+          <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem;">
+            Seleccione un producto para simular una compra. La Cajita de Pagos de PayPhone se desplegará para completar
+            la transacción.
+          </p>
+
+          <div class="products-grid">
+            <!-- Producto 1 -->
+            <div class="product-card">
+              <div class="product-image">
+                <img src="images/1.png" alt="Curso Premium Next.js">
+              </div>
+              <h3 class="product-title">Curso Premium Next.js</h3>
+              <p class="product-desc">Aprenda desarrollo web profesional paso a paso con rutas de servidor y base de
+                datos.</p>
+              <div class="product-footer">
+                <span class="product-price">$5.00</span>
+                <button class="btn btn-primary buy-btn" data-id="p1" data-name="Curso Premium Next.js" data-price="5.00"
+                  data-taxable="true">Agregar al Carrito</button>
+              </div>
+            </div>
+
+            <!-- Producto 2 -->
+            <div class="product-card">
+              <div class="product-image">
+                <img src="images/2.jpg" alt="Auriculares Nova Pro">
+              </div>
+              <h3 class="product-title">Auriculares Nova Pro</h3>
+              <p class="product-desc">Auriculares de alta fidelidad con cancelación activa de ruido para
+                desarrolladores.</p>
+              <div class="product-footer">
+                <span class="product-price">$15.50</span>
+                <button class="btn btn-primary buy-btn" data-id="p2" data-name="Auriculares Nova Pro" data-price="15.50"
+                  data-taxable="true">Agregar al Carrito</button>
+              </div>
+            </div>
+
+            <!-- Producto 3 -->
+            <div class="product-card">
+              <div class="product-image">
+                <img src="images/stickers.png" alt="Pack de Stickers Devs">
+              </div>
+              <h3 class="product-title">Pack de Stickers Devs</h3>
+              <p class="product-desc">Decoración premium para su laptop con memes y logos de programación.</p>
+              <div class="product-footer">
+                <span class="product-price">$1.00</span>
+                <button class="btn btn-primary buy-btn" data-id="p3" data-name="Pack de Stickers Devs" data-price="1.00"
+                  data-taxable="false">Agregar al Carrito</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Checkout Box UI Area (Se activa dinámicamente) -->
+          <div id="checkout-section"
+            style="display: none; border-top: 1px solid var(--border-light); padding-top: 2rem; margin-top: 1rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+              <h3 style="font-family: var(--font-title); font-size: 1.15rem;">Resumen de Compra</h3>
+              <button id="cancel-checkout" class="btn btn-secondary"
+                style="padding: 0.4rem 0.8rem; font-size: 0.8rem;">Cancelar</button>
+            </div>
+
+            <div
+              style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem; background: rgba(0,0,0,0.2); padding: 1rem; border-radius: 10px; border: 1px solid var(--border-light); font-size: 0.9rem;">
+              <div>Producto:</div>
+              <div id="summary-name" style="text-align: right; font-weight: 600;">-</div>
+              <div>Subtotal (Base Imponible):</div>
+              <div id="summary-subtotal" style="text-align: right;">-</div>
+              <div>IVA (15%):</div>
+              <div id="summary-tax" style="text-align: right;">-</div>
+              <div
+                style="font-weight: 700; color: white; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 0.5rem;">
+                TOTAL A PAGAR:</div>
+              <div id="summary-total"
+                style="text-align: right; font-weight: 700; color: #10b981; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 0.5rem;">
+                -</div>
+            </div>
+
+            <!-- Contenedor Oficial donde PayPhone inyecta su Cajita de Pagos -->
+            <div style="display: flex; justify-content: center;">
+              <div id="payphone-payment-box-container" class="payphone-box-wrapper"
+                style="width: 100%; max-width: 400px; display: block;">
+                <div id="payphone-btn"></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Historial de Transacciones de la Sesión -->
+        <section class="glass-panel">
+          <h2 class="panel-title">Historial de Transacciones Recientes</h2>
+          <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem;">
+            Registros en memoria de las transacciones de prueba procesadas en esta sesión y validadas mediante la API.
+          </p>
+
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Fecha/Hora</th>
+                  <th>ID PayPhone</th>
+                  <th>Transacción Cliente</th>
+                  <th>Monto</th>
+                  <th>Estado</th>
+                  <th>JSON API</th>
+                </tr>
+              </thead>
+              <tbody id="transactions-log">
+                <tr>
+                  <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 2rem;">
+                    No se han realizado transacciones en esta sesión de pruebas.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </main>
+
+      <!-- Lado Derecho: Carrito de Compras -->
+      <aside>
+        <section class="glass-panel" style="position: sticky; top: 2rem;">
+          <h2 class="panel-title" style="display: flex; align-items: center; gap: 0.5rem;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="9" cy="21" r="1"></circle>
+              <circle cx="20" cy="21" r="1"></circle>
+              <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+            </svg>
+            Carrito de Compras
+          </h2>
+
+          <!-- Lista de Productos en el Carrito -->
+          <div id="cart-items-container" class="cart-items-list"
+            style="margin-top: 1rem; max-height: 350px; overflow-y: auto; padding-right: 0.25rem;">
+            <p style="color: var(--text-muted); font-size: 0.9rem; text-align: center; padding: 2rem 0;">
+              Tu carrito está vacío.
+            </p>
+          </div>
+
+          <!-- Resumen de Costos -->
+          <div class="cart-summary"
+            style="margin-top: 1.5rem; border-top: 1px solid var(--border-light); padding-top: 1.5rem; font-size: 0.9rem; display: none;"
+            id="cart-summary-section">
+            <div
+              style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; color: var(--text-muted);">
+              <span>Subtotal IVA 15%:</span>
+              <span id="cart-subtotal-taxable" style="color: white; font-weight: 500;">$0.00</span>
+            </div>
+            <div
+              style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; color: var(--text-muted);">
+              <span>Subtotal IVA 0%:</span>
+              <span id="cart-subtotal-nontaxable" style="color: white; font-weight: 500;">$0.00</span>
+            </div>
+            <div
+              style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; color: var(--text-muted);">
+              <span>IVA (15%):</span>
+              <span id="cart-tax" style="color: white; font-weight: 500;">$0.00</span>
+            </div>
+            <div
+              style="display: flex; justify-content: space-between; margin-top: 0.75rem; border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 0.75rem; font-weight: 700; font-size: 1.05rem; color: white;">
+              <span>TOTAL A PAGAR:</span>
+              <span id="cart-total" style="color: var(--success);">$0.00</span>
+            </div>
+
+            <!-- Botones de Acción del Carrito -->
+            <div style="display: flex; flex-direction: column; gap: 0.75rem; margin-top: 1.5rem;">
+              <button id="pay-cart-btn" class="btn btn-primary btn-block"
+                style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; font-weight: 600;">
+                Pagar con PayPhone
+              </button>
+              <button id="clear-cart-btn" class="btn btn-secondary btn-block">
+                Vaciar Carrito
+              </button>
+            </div>
+          </div>
+        </section>
+      </aside>
+
+    </div>
+  </div>
+
+  <!-- Modal para Visualizar JSON de la API -->
+  <div id="json-modal" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Respuesta Completa del API</h3>
+        <button class="close-modal" id="close-modal-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1rem;">
+          Obtenido directamente desde el endpoint <code>Confirm</code> de PayPhone.
+        </p>
+        <pre id="json-display"></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- Lógica Frontend -->
+  <script src="js/app.js"></script>
+</body>
+
+</html>

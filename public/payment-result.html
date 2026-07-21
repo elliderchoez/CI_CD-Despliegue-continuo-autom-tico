@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Verificación de Pago - NovaStore</title>
+
+  <!-- Estilos del Proyecto -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+  <div class="app-container">
+    <div class="result-container">
+
+      <!-- Panel de Carga (Loader Inicial) -->
+      <div id="loading-panel" class="glass-panel result-card">
+        <div class="result-icon-wrapper"
+          style="background-color: rgba(99, 102, 241, 0.1); border: 2px dashed var(--primary);">
+          <span class="loader" style="width: 40px; height: 40px; border-width: 4px;"></span>
+        </div>
+        <h2 class="result-title animate-pulse-slow">Verificando Transacción</h2>
+        <p class="result-subtitle">
+          Confirmando el pago de forma segura con los servidores de PayPhone. Por favor, no cierre esta pestaña...
+        </p>
+      </div>
+
+      <!-- Panel de Error en Parámetros -->
+      <div id="invalid-panel" class="glass-panel result-card" style="display: none;">
+        <div class="result-icon-wrapper icon-error">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </div>
+        <h2 class="result-title">Error de Parámetros</h2>
+        <p class="result-subtitle" id="invalid-message">
+          No se encontraron datos válidos de transacción en la URL de retorno.
+        </p>
+        <a href="/" class="btn btn-secondary">Regresar a la Tienda</a>
+      </div>
+
+      <!-- Panel de Pago Exitoso (Aprobado) -->
+      <div id="success-panel" class="glass-panel result-card" style="display: none;">
+        <div class="result-icon-wrapper icon-success">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+        </div>
+        <h2 class="result-title" style="color: #34d399;">¡Pago Aprobado!</h2>
+        <p class="result-subtitle">
+          La transacción ha sido confirmada satisfactoriamente por la API de PayPhone.
+        </p>
+
+        <!-- Detalles de la Transacción -->
+        <div class="result-details">
+          <div class="detail-row">
+            <span class="detail-label">ID Transacción PayPhone</span>
+            <span class="detail-value" id="success-id">-</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Referencia del Cliente</span>
+            <span class="detail-value" id="success-txid">-</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Monto Procesado</span>
+            <span class="detail-value" id="success-amount" style="color: #34d399; font-weight: 700;">-</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Email del Comprador</span>
+            <span class="detail-value" id="success-email">-</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Estado Oficial</span>
+            <span class="detail-value"><span class="status-badge status-approved">Aprobado</span></span>
+          </div>
+        </div>
+
+        <div style="margin-bottom: 2rem; text-align: left;">
+          <h4
+            style="font-family: var(--font-title); font-size: 0.95rem; margin-bottom: 0.5rem; color: var(--text-muted);">
+            Respuesta JSON del API de Confirmación:</h4>
+          <pre id="success-json" style="max-height: 200px; text-align: left;"></pre>
+        </div>
+
+        <a href="/" class="btn btn-primary">Volver a la Tienda</a>
+      </div>
+
+      <!-- Panel de Pago Fallido / Cancelado / Rechazado -->
+      <div id="failure-panel" class="glass-panel result-card" style="display: none;">
+        <div class="result-icon-wrapper icon-error">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </div>
+        <h2 class="result-title" style="color: #f87171;" id="failure-title">Pago No Completado</h2>
+        <p class="result-subtitle" id="failure-message">
+          La pasarela de PayPhone reportó un problema con la transacción o esta fue cancelada.
+        </p>
+
+        <!-- Detalles de la Falla -->
+        <div class="result-details">
+          <div class="detail-row">
+            <span class="detail-label">ID Transacción PayPhone</span>
+            <span class="detail-value" id="failure-id">-</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Referencia del Cliente</span>
+            <span class="detail-value" id="failure-txid">-</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Detalle del Error</span>
+            <span class="detail-value" id="failure-error" style="color: #f87171;">-</span>
+          </div>
+        </div>
+
+        <div style="margin-bottom: 2rem; text-align: left;" id="failure-json-container">
+          <h4
+            style="font-family: var(--font-title); font-size: 0.95rem; margin-bottom: 0.5rem; color: var(--text-muted);">
+            Respuesta de la API de PayPhone:</h4>
+          <pre id="failure-json" style="max-height: 200px; text-align: left;"></pre>
+        </div>
+
+        <a href="/" class="btn btn-secondary">Intentar Nuevamente</a>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      // 1. Obtener parámetros de la URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const transactionId = urlParams.get('id');
+      // PayPhone puede redirigir con 'clientTransactionId' o 'clientTxId'
+      const clientTxId = urlParams.get('clientTransactionId') || urlParams.get('clientTxId');
+
+      const loadingPanel = document.getElementById('loading-panel');
+      const invalidPanel = document.getElementById('invalid-panel');
+      const successPanel = document.getElementById('success-panel');
+      const failurePanel = document.getElementById('failure-panel');
+
+      // Validar si tenemos los parámetros
+      if (!transactionId || !clientTxId) {
+        loadingPanel.style.display = 'none';
+        invalidPanel.style.display = 'block';
+        document.getElementById('invalid-message').textContent =
+          `Faltan parámetros clave. Se recibió ID: ${transactionId || 'Ninguno'}, ClientTxId: ${clientTxId || 'Ninguno'}`;
+        return;
+      }
+
+      const storedAmount = localStorage.getItem(clientTxId);
+      const parsedAmount = storedAmount ? parseInt(storedAmount, 10) : null;
+
+      try {
+        const response = await fetch('/api/confirm', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            id: transactionId, 
+            clientTxId: clientTxId, 
+            amount: parsedAmount 
+          })
+        });
+
+        const result = await response.json();
+        loadingPanel.style.display = 'none';
+
+        if (response.ok && result.success) {
+          // 3. Pago Aprobado
+          localStorage.removeItem('payphone_cart');
+          successPanel.style.display = 'block';
+          document.getElementById('success-id').textContent = result.transaction.id;
+          document.getElementById('success-txid').textContent = result.transaction.clientTxId;
+          document.getElementById('success-amount').textContent = `$${result.transaction.amount} ${result.transaction.currency}`;
+          document.getElementById('success-email').textContent = result.transaction.email;
+          document.getElementById('success-json').textContent = JSON.stringify(result.transaction.rawResponse, null, 2);
+        } else {
+          // 4. Pago fallido, rechazado o cancelado
+          failurePanel.style.display = 'block';
+
+          const errorMsg = result.error || 'La transacción no pudo ser verificada o no fue aprobada.';
+          document.getElementById('failure-error').textContent = errorMsg;
+          document.getElementById('failure-id').textContent = transactionId || 'N/A';
+          document.getElementById('failure-txid').textContent = clientTxId || 'N/A';
+
+          if (result.rawResponse) {
+            document.getElementById('failure-json').textContent = JSON.stringify(result.rawResponse, null, 2);
+          } else {
+            document.getElementById('failure-json-container').style.display = 'none';
+          }
+
+          // Ajustar título y mensaje si es cancelado o rechazado
+          if (result.rawResponse && (result.rawResponse.transactionStatus === 'CANCELED' || result.rawResponse.status === 'CANCELED')) {
+            document.getElementById('failure-title').textContent = 'Pago Cancelado';
+            document.getElementById('failure-message').textContent = 'El pago fue cancelado por el usuario o expiró.';
+          } else {
+            document.getElementById('failure-title').textContent = 'Pago Rechazado';
+            document.getElementById('failure-message').textContent = 'El pago fue rechazado por la pasarela de pagos.';
+          }
+        }
+      } catch (error) {
+        console.error('Error al realizar la confirmación:', error);
+        loadingPanel.style.display = 'none';
+        failurePanel.style.display = 'block';
+        document.getElementById('failure-title').textContent = 'Error de Servidor';
+        document.getElementById('failure-message').textContent = 'Hubo un error de conexión al procesar la confirmación.';
+        document.getElementById('failure-error').textContent = error.message;
+        document.getElementById('failure-json-container').style.display = 'none';
+      }
+    });
+  </script>
+</body>
+
+</html>
