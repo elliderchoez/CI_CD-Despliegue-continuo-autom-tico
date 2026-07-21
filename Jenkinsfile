@@ -11,14 +11,14 @@ pipeline {
 
     tools {
         nodejs "Node25" // Configura una instalación de Node.js en Jenkins
-        dockerTool 'Dockertool'  // Cambia el nombre de la herramienta según tu configuración en Jenkins
+        dockerTool 'Dockertool'  // Configuración de la herramienta de Docker en Jenkins
     }
 
     stages {
         stage('Construir Imagen Docker') {
             steps {
                 echo "Construyendo la imagen Docker: ${IMAGE_NAME}:${IMAGE_TAG}..."
-                // Construye la imagen usando el build number como tag y también actualiza latest
+                // Construye la imagen usando el build number y latest como tags
                 sh "docker build -t ${IMAGE_NAME}:${IMAGE_TAG} -t ${IMAGE_NAME}:latest ."
             }
         }
@@ -45,7 +45,7 @@ pipeline {
         }
     }
 
-    // Acciones post-ejecución para limpieza e informes
+    // Acciones post-ejecución para limpieza
     post {
         success {
             echo "¡El pipeline se completó con éxito! Aplicación corriendo en el puerto ${PORT}."
