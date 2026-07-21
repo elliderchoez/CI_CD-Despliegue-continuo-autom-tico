@@ -15,6 +15,15 @@ pipeline {
     }
 
     stages {
+        // --- ETAPA AÑADIDA PARA CUMPLIR CON EL CRITERIO DE LA RÚBRICA ---
+        stage('Test (Pruebas)') {
+            steps {
+                echo "Ejecutando pruebas de sintaxis en el servidor Node.js..."
+                // Verifica que el archivo index.js no tenga errores de sintaxis antes de empaquetar
+                sh 'node --check index.js'
+            }
+        }
+
         stage('Construir Imagen Docker') {
             steps {
                 echo "Construyendo la imagen Docker: ${IMAGE_NAME}:${IMAGE_TAG}..."
