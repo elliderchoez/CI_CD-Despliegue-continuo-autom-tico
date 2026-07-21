@@ -20,7 +20,7 @@ pipeline {
             steps {
                 echo "Ejecutando pruebas de sintaxis en el servidor Node.js..."
                 // Verifica que el archivo index.js no tenga errores de sintaxis antes de empaquetar
-                sh 'node --check index.js'
+                sh 'node --check server.js'
             }
         }
 
